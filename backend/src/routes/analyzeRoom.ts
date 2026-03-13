@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
+import { analyzeRoomWithOpenAI } from "../openai/analyzeRoomWithOpenAI.js";
 
 const SUPPORTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function registerAnalyzeRoomRoute(app: FastifyInstance) {
   app.post("/analyze-room", async (request, reply) => {
@@ -19,11 +21,16 @@ export async function registerAnalyzeRoomRoute(app: FastifyInstance) {
 
     const buffer = await file.toBuffer();
 
-    return {
-      ok: true,
-      filename: file.filename,
-      mimetype: file.mimetype,
-      size: buffer.length,
-    };
+    if (buffer.length > MAX_FILE_SIZE) {
+      return reply.status(413).send({ ok: false, error: "File exceeds 10MB limit" });
+    }
+
+    try {
+      const result = await analyzeRoomWithOpenAI(buffer, file.mimetype);
+      return result;
+    } catch (err) {
+      app.log.error(err);
+      return reply.status(500).send({ ok: false, error: "Analysis failed" });
+    }
   });
 }
