@@ -2,6 +2,7 @@ import "dotenv/config";
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
 import { registerTestOpenAIRoute } from "./routes/testOpenAI";
+import { registerAnalyzeRoomRoute } from "./routes/analyzeRoom";
 
 async function start() {
   const app = Fastify({
@@ -17,12 +18,7 @@ async function start() {
     };
   });
 
-  app.post("/analyze-room", async () => {
-    return {
-      message: "Route placeholder works",
-    };
-  });
-
+  await registerAnalyzeRoomRoute(app);
   await registerTestOpenAIRoute(app);
 
   const port = Number(process.env.PORT || 3000);
