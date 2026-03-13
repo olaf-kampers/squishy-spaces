@@ -16,14 +16,18 @@ Score the room across exactly these 6 categories in this order:
 6. Style Coherence — how unified and intentional the overall aesthetic feels`;
 
 // --- Scoring rubric ---
-const RUBRIC_INSTRUCTIONS = `Use the full 1–10 scale. Do not cluster scores between 5 and 7.
+const RUBRIC_INSTRUCTIONS = `Use the full 1–10 scale. Scores above 7 should be rare — only award them when the visible evidence clearly supports it.
 
 Score anchors (apply to every category):
 - 1–2: seriously problematic, actively detracts from the space
 - 3–4: below average, noticeable issues that need attention
-- 5–6: functional but unremarkable, room to improve
-- 7–8: good, above average with minor refinements possible
-- 9–10: exceptional, considered and well-executed
+- 5: average or mixed — some things work, some don't
+- 6: decent but noticeably flawed — more good than bad, but the weaknesses are obvious
+- 7: clearly good — works well with only minor weaknesses
+- 8: very good — strong execution, stands out positively
+- 9–10: exceptional — reserve for cases where the visible evidence strongly and unambiguously supports it
+
+The reason field must reflect the actual score. A score of 5 or 6 should read like a mixed or flawed assessment, not a positive one.
 
 overallScore should reflect the room as a whole, not an average of the categories.
 
@@ -108,8 +112,6 @@ export async function analyzeRoomWithOpenAI(
     throw new Error("OpenAI returned an empty response");
   }
 
-  console.log("[analyzeRoomWithOpenAI] raw output:", outputText);
-
   let parsed: unknown;
   try {
     parsed = JSON.parse(outputText);
@@ -117,8 +119,6 @@ export async function analyzeRoomWithOpenAI(
     const preview = outputText.slice(0, 200);
     throw new Error(`Failed to parse OpenAI response as JSON. Preview: ${preview}`);
   }
-
-  console.log("[analyzeRoomWithOpenAI] parsed object:", JSON.stringify(parsed, null, 2));
 
   return RoomAnalysisSchema.parse(parsed);
 }
