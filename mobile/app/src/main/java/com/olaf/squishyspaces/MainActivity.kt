@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                             is AppState.Loading -> LoadingScreen()
                             is AppState.Result -> ResultScreen(
                                 analysis = s.analysis,
+                                imageUri = s.imageUri,
                                 viewModel = viewModel,
                             )
                             is AppState.Error -> ErrorScreen(
