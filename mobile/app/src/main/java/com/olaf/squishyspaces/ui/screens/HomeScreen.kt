@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.olaf.squishyspaces.data.model.SavedAnalysis
@@ -50,24 +51,33 @@ fun HomeScreen(viewModel: SquishyViewModel) {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        // Header
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = "Squishy Spaces",
-                style = MaterialTheme.typography.headlineLarge,
-            )
-            Text(
-                text = "Get honest feedback on your room.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Button(
-            onClick = { launcher.launch("image/*") },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Pick a room photo")
+        // Hero card — Squishy as the face of the app
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                SquishyMascot(modifier = Modifier.size(120.dp))
+                Text(
+                    text = "Hi, I'm Squishy!",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "Drop a room photo and I'll give you my honest verdict.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = { launcher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Analyze a Room")
+                }
+            }
         }
 
         // Recent rooms
@@ -87,7 +97,6 @@ fun HomeScreen(viewModel: SquishyViewModel) {
             }
         }
 
-        // Bottom breathing room
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
