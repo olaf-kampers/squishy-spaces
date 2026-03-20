@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
+import com.olaf.squishyspaces.ui.theme.SquishyDesign
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,9 +52,13 @@ fun ResultScreen(analysis: RoomAnalysis, imageUri: Uri, viewModel: SquishyViewMo
             onClick = { viewModel.onReset() },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SquishyDesign.TealAccent,
+            ),
+            shape = RoundedCornerShape(SquishyDesign.RadiusCard),
         ) {
-            Text("Analyze another room")
+            Text("Analyze another room", fontWeight = FontWeight.SemiBold)
         }
     }
 }
