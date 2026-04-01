@@ -35,6 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +48,12 @@ import com.olaf.squishyspaces.R
 import com.olaf.squishyspaces.data.model.Category
 import com.olaf.squishyspaces.data.model.RoomAnalysis
 import com.olaf.squishyspaces.ui.theme.SquishyDesign
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import kotlinx.coroutines.delay
 
 private val TOP_METRIC_NAMES = listOf("Layout", "Lighting", "Style Coherence")
@@ -62,153 +70,7 @@ fun ResultOverviewTab(analysis: RoomAnalysis, imageUri: Uri) {
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         // ── Squishy hero card ─────────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(8.dp, RoundedCornerShape(SquishyDesign.RadiusHero), clip = false)
-                .clip(RoundedCornerShape(SquishyDesign.RadiusHero)),
-        ) {
-            // Layer 1: scene background — clearly visible studio scene
-            Image(
-                painter = painterResource(R.drawable.background),
-                contentDescription = null,
-                modifier = Modifier
-                    .matchParentSize()
-                    .alpha(0.82f),
-                contentScale = ContentScale.Crop,
-            )
-            // Layer 2: scrim — slightly stronger now that there is no local frosted panel
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFF0A1520).copy(alpha = 0.28f)),
-            )
-            // Layer 3: soft brand gradient tint — colors the scene without burying it
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .alpha(0.36f)
-                    .background(SquishyDesign.heroGradient),
-            )
-
-            // Decorative circles that bleed off the card edges
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .align(Alignment.TopEnd)
-                    .offset(x = 40.dp, y = (-40).dp)
-                    .background(Color.White.copy(alpha = 0.06f), CircleShape),
-            )
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .align(Alignment.BottomStart)
-                    .offset(x = (-30).dp, y = 30.dp)
-                    .background(Color.White.copy(alpha = 0.04f), CircleShape),
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                // ① Reaction + emoji — glass pill, primary focal text
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF0A1520).copy(alpha = 0.34f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        Text(
-                            text = mood.reaction,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            color = SquishyDesign.OnHero,
-                        )
-                        Text(
-                            text = mood.emoji,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-
-                // ② Middle row: Squishy on the left, score on the right
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    // Squishy with halo — no scrim, scene stays visible here
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(190.dp)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            Color.White.copy(alpha = 0.40f),
-                                            Color.Transparent,
-                                        ),
-                                    ),
-                                    shape = CircleShape,
-                                ),
-                        )
-                        SquishyMascot(modifier = Modifier.size(136.dp))
-                    }
-
-                    // Score block — glass pill, score is the focal point
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .background(Color(0xFF0A1520).copy(alpha = 0.30f), RoundedCornerShape(12.dp))
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            Text(
-                                text = "${analysis.overallScore}",
-                                fontSize = 72.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SquishyDesign.heroScoreColor(analysis.overallScore),
-                            )
-                            Text(
-                                text = "/ 10",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = SquishyDesign.OnHeroMuted,
-                                modifier = Modifier.padding(start = 3.dp, bottom = 8.dp),
-                            )
-                        }
-                    }
-                }
-
-                // ③ Style guess — glass pill, clearly tertiary
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF0A1520).copy(alpha = 0.26f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = analysis.styleGuess,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SquishyDesign.OnHeroSubtle,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
+        ResultOverviewHero(analysis = analysis, mood = mood)
 
         // ── Top Metrics ───────────────────────────────────────────────────
         Text(
@@ -281,11 +143,192 @@ fun ResultOverviewTab(analysis: RoomAnalysis, imageUri: Uri) {
 }
 
 @Composable
-internal fun SquishyMascot(modifier: Modifier = Modifier) {
-    var isBlinking by remember { mutableStateOf(false) }
+private fun ResultOverviewHero(analysis: RoomAnalysis, mood: SquishyMood) {
+    val impactMode = scoreToImpactMode(analysis.overallScore)
+    var showOverlay by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        while (true) {
+        if (impactMode == ResultImpactMode.GREAT || impactMode == ResultImpactMode.DISASTER) {
+            delay(200)
+            showOverlay = true
+            delay(1400)
+            showOverlay = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(8.dp, RoundedCornerShape(SquishyDesign.RadiusHero), clip = false)
+            .clip(RoundedCornerShape(SquishyDesign.RadiusHero)),
+    ) {
+        // Layer 1: scene background — clearly visible studio scene
+        Image(
+            painter = painterResource(R.drawable.background),
+            contentDescription = null,
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0.82f),
+            contentScale = ContentScale.Crop,
+        )
+        // Layer 2: scrim
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xFF0A1520).copy(alpha = 0.28f)),
+        )
+        // Layer 3: soft brand gradient tint
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0.36f)
+                .background(SquishyDesign.heroGradient),
+        )
+
+        // Decorative circles that bleed off the card edges
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 40.dp, y = (-40).dp)
+                .background(Color.White.copy(alpha = 0.06f), CircleShape),
+        )
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-30).dp, y = 30.dp)
+                .background(Color.White.copy(alpha = 0.04f), CircleShape),
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // ① Reaction + emoji — glass pill
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF0A1520).copy(alpha = 0.26f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = mood.reaction,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = SquishyDesign.OnHero,
+                    )
+                    Text(
+                        text = mood.emoji,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+
+            // ② Middle row: Squishy on the left, score on the right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(190.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.40f),
+                                        Color.Transparent,
+                                    ),
+                                ),
+                                shape = CircleShape,
+                            ),
+                    )
+                    SquishyMascot(modifier = Modifier.size(136.dp), mood = mood)
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color(0xFF0A1520).copy(alpha = 0.22f), RoundedCornerShape(12.dp))
+                        .padding(vertical = 14.dp, horizontal = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "${analysis.overallScore}",
+                            fontSize = 72.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SquishyDesign.heroScoreColor(analysis.overallScore),
+                        )
+                        Text(
+                            text = "/ 10",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = SquishyDesign.OnHeroMuted,
+                            modifier = Modifier.padding(start = 3.dp, bottom = 8.dp),
+                        )
+                    }
+                }
+            }
+
+            // ③ Style guess — outlined text: white fill, red stroke
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = analysis.styleGuess,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        drawStyle = Stroke(width = 8f, join = StrokeJoin.Round),
+                        color = Color(0xFFE53935),
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    text = analysis.styleGuess,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        // ── Manga overlay — temporary, sits above all hero layers ─────────
+        AnimatedVisibility(
+            visible = showOverlay,
+            modifier = Modifier.matchParentSize(),
+            enter = fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.88f),
+            exit = fadeOut(tween(280)) + scaleOut(tween(280), targetScale = 1.06f),
+        ) {
+            MangaImpactOverlay(mode = impactMode, modifier = Modifier.matchParentSize())
+        }
+    }
+}
+
+@Composable
+internal fun SquishyMascot(modifier: Modifier = Modifier, mood: SquishyMood = SquishyMood.PLEASED) {
+    var isBlinking by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mood) {
+        isBlinking = false
+        while (mood.shouldBlink) {
             delay(3000)
             isBlinking = true
             delay(150)
@@ -295,7 +338,7 @@ internal fun SquishyMascot(modifier: Modifier = Modifier) {
 
     Image(
         painter = painterResource(
-            if (isBlinking) R.drawable.squishy_blink else R.drawable.squishy_pleased
+            if (isBlinking) R.drawable.squishy_blink else mood.drawable
         ),
         contentDescription = null,
         modifier = modifier,

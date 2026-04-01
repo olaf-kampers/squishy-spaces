@@ -26,6 +26,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +58,17 @@ fun HomeScreen(viewModel: SquishyViewModel) {
     ) { uri ->
         uri?.let { viewModel.onImageSelected(it) }
     }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "mascotFloat")
+    val floatY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "floatY",
+    )
 
     Column(
         modifier = Modifier
@@ -90,10 +107,13 @@ fun HomeScreen(viewModel: SquishyViewModel) {
                     .fillMaxWidth()
                     .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                // Mascot with halo
-                Box(contentAlignment = Alignment.Center) {
+                // Mascot with halo — floats gently on an infinite loop
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.offset(y = floatY.dp),
+                ) {
                     Box(
                         modifier = Modifier
                             .size(300.dp)
@@ -126,11 +146,15 @@ fun HomeScreen(viewModel: SquishyViewModel) {
                         containerColor = Color.White,
                         contentColor = SquishyDesign.TealAccent,
                     ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 2.dp,
+                    ),
                     shape = RoundedCornerShape(SquishyDesign.RadiusCard),
                 ) {
                     Text(
                         text = "Analyze a Room",
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -178,7 +202,7 @@ private fun RecentRoomItem(saved: SavedAnalysis, onClick: () -> Unit) {
                 model = saved.imageUri,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(72.dp)
                     .clip(RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop,
             )

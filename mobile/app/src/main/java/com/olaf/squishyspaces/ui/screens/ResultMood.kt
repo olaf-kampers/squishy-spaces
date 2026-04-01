@@ -1,6 +1,8 @@
 package com.olaf.squishyspaces.ui.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
+import com.olaf.squishyspaces.R
 
 // Shared score color used by both overview and details tabs
 fun scoreColor(score: Int): Color = when (score) {
@@ -18,12 +20,17 @@ fun tierLabel(tier: String): String = when (tier) {
     else            -> tier.uppercase()
 }
 
-enum class SquishyMood(val emoji: String, val reaction: String) {
-    DELIGHTED("🐙✨", "Squishy is genuinely impressed."),
-    PLEASED("🐙", "Squishy approves… mostly."),
-    SKEPTICAL("🐙🤨", "Squishy sees potential, but has notes."),
-    UNIMPRESSED("🐙😐", "Squishy is trying to be polite."),
-    HORRIFIED("🐙😱", "Squishy would like to leave this room immediately."),
+enum class SquishyMood(
+    val emoji: String,
+    val reaction: String,
+    @DrawableRes val drawable: Int,
+    val shouldBlink: Boolean,
+) {
+    DELIGHTED("🐙✨", "Squishy is genuinely impressed.",        R.drawable.squishy_happy,     shouldBlink = false),
+    PLEASED  ("🐙",   "Squishy approves… mostly.",             R.drawable.squishy_pleased,   shouldBlink = true),
+    SKEPTICAL("🐙🤨", "Squishy sees potential, but has notes.", R.drawable.squishy_thinking,  shouldBlink = false),
+    UNIMPRESSED("🐙😐", "Squishy is trying to be polite.",     R.drawable.squishy_concerned, shouldBlink = false),
+    HORRIFIED("🐙😱", "Squishy would like to leave this room immediately.", R.drawable.squishy_shocked, shouldBlink = false),
 }
 
 fun moodFromScore(score: Int): SquishyMood = when (score) {
